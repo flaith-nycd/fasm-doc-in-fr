@@ -1,0 +1,38 @@
+31 Patch Control
+
+0
+0
+1
+FASM-FR.tex
+7
+4
+1
+
+FASM-FR.tex
+TeX:FR:UNIX:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR:FR
+152154107 0 -1 309 -1 748 22 23 1126 586 1 1 193 221 -1 0 0 62 62 -1 -1 2146 1 0 748 -1  0 -1 0
+fasm_intro.tex
+TeX:UNIX
+269594619 0 -1 21659 -1 21641 44 46 1148 609 1 1 241 340 -1 0 0 20 20 -1 -1 977 1 0 21641 -1  0 -1 0
+fasm_instruction.tex
+TeX:UNIX
+1159163 0 -1 45681 -1 44796 66 69 1170 632 1 1 265 476 -1 0 0 28 28 -1 -1 1401 1 0 44796 -1  0 -1 0
+fasm_prog_windows.tex
+TeX
+1060859 2 -1 33 -1 0 88 92 1192 655 1 1 89 0 -1 0 0 31 31 -1 -1 377 1 0 0 -1  0 -1 0
+:\Users\flaith\AppData\Roaming\WinEdt Team\WinEdt 10\ConfigEx\UserPreferences.ini
+DATA:INI:EDT
+269485050 0 0 1 0 1 100 100 1233 568 1 1 89 -1836 -1 -1 0 0 -1 -1 -1 -1 1 0 1 0  0 0 0
+:\home\flaith\6-Games\Another World\System.Log
+DATA
+273678578 0 0 1 0 1 100 100 1233 568 1 0 73 0 -1 -1 0 0 -1 -1 -1 -1 1 0 1 0  0 0 0
+:\home\flaith\2-Documents\LaTEX\cv.tex
+TeX
+269496315 0 -1 0 -1 0 110 115 1280 563 0 25 0 -1 -1 0 0 -1 -1 -1 -1 1 0  0 -1 0
+
+*FASM-FR.tex
+>
+*fasm_intro
+*fasm_instruction
+*fasm_prog_windows
+<

@@ -1,0 +1,656 @@
+\index{Introduction}
+\chapter{Introduction}
+Ce chapitre contient toutes les informations importantes dont vous
+aurez besoin pour commencer à utiliser flat assembler. Si vous
+êtes un programmeur expérimenté en assembleur, vous devriez lire
+au moins ce chapitre avant d'utiliser ce compilateur.
+
+\index{Introduction!Survol du Compilateur}
+\section{Survol du Compilateur}
+Flat assembler est un compilateur rapide générant du langage
+machine pour les processeurs x86, faisant une multitude de
+passages pour optimiser la taille du code généré. Il est
+auto-compilable et des versions pour différentes plates-formes
+sont fournies. Ces versions ont été conçues pour être utilisé à
+partir de la ligne de commande et leur fonctionnement sur les
+différentes plates-formes devrait être identique.
+
+Ce document décrit aussi la version IDE conçue pour le système
+Windows qui utilise une interface graphique, et qui a un éditeur
+intégré, au lieu de la version console. Mais d'un point de vue
+compilation, il a exactement les mêmes fonctionnalités que la
+version console, et les parties suivantes (à partir du chapitre
+1.2 de ce document) seront identiques à toutes les versions de
+flat assembler. L'exécutable de la version IDE est
+\texttt{fasmw.exe}, alors que la version ligne de commande est
+\texttt{fasm.exe}
+
+\index{Introduction!Pré-requis système}
+\subsection{Pré-requis système}
+Toutes les versions utilisent un processeur x86/32 bits (un 80386
+minimum), cependant ils peuvent aussi concevoir des programmes
+pour les architectures x86/16 bits. La version console de Windows
+utilise n'importe quel système d'exploitation Windows 32 bits,
+alors que la version avec interface graphique requiert une version
+4.0 ou plus du système, il fonctionnera donc sur tous systèmes
+compatibles avec Windows 95 et supérieure.
+
+Les exemples fournies avec cette version implique que la variable
+d'environnement \texttt{INCLUDE} soit définie par le chemin du
+répertoire \texttt{include} de flat assembler. Si cette variable
+existe déjà dans votre système et contient des chemins utilisés
+par d'autres programmes, vous n'avez qu'à lui ajouter le nouveau
+chemin (les différents chemins doivent être séparés par des
+points-virgule). Si vous ne voulez pas définir ce type de
+variable, ou si vous ne savez pas comment, vous pouvez le définir
+pour la version avec interface graphique de flat assembler en
+éditant le fichier \texttt{fasmw.ini} qui est dans le même
+répertoire, ce fichier est créé automatiquement dés le 1$^{er}$
+lancement de \texttt{fasmw.exe}, mais vous pouvez aussi le créer
+par vous-même, dans ce cas vous devrez ajouter la valeur
+\texttt{Include} dans la section \texttt{Environment}. Par
+exemple, si vous avez installé les fichiers flat assembler dans le
+répertoire \texttt{c$:$$\backslash$fasmw}, vous devrez insérer ces
+deux lignes suivantes dans votre fichier
+\texttt{c$:$$\backslash$fasmw$\backslash$fasmw.ini} :
+\begin{verbatim}[Environment]
+Include = c:\fasmw\include
+\end{verbatim}
+Si vous ne définissez pas la variable d'environnement
+\texttt{INCLUDE} correctement, vous devrez mettre manuellement le
+chemin complet des includes Windows dans chaque programme que vous
+allez compiler.
+
+\index{Introduction!Utilisation du compilateur}
+\subsection{Utilisation du compilateur}
+Pour commencer à utiliser flat assembler, double-cliquer sur
+l'icône du fichier \texttt{fasmw.exe}, ou déplacez l'icône de
+votre fichier source dessus (drag \& drop). Plus tard vous pourrez
+aussi ouvrir des fichiers sources avec la commande \emph{Open} du
+menu \emph{File}, ou en déplaçant les fichiers dans l'éditeur.
+Vous pouvez avoir plusieurs fichiers ouverts simultanément, chacun
+étant représenté par un onglet en haut de l'éditeur. Pour
+sélectionner le fichier à éditer vous n'avez qu'à cliquer sur
+l'onglet correspondant avec le clique gauche de votre souris. Par
+défaut le compilateur gère le fichier que vous êtes en train
+d'éditer, mais vous pouvez forcer le compilateur à gérer un
+fichier en particulier en cliquant sur l'onglet approprié avec le
+bouton droit de votre souris et en sélectionnant \emph{Assign}. Un
+seul fichier peut être assigné à la fois.
+
+Quand votre fichier est prêt à être compilé, sélectionnez la
+commande \emph{Compile} dans le menu \emph{Run}. Un résumé de la
+compilation sera affiché si celle-ci est réussie, sinon l'erreur
+sera affiché. Dans ce résumé se trouvera une information sur le
+nombre de passages effectué, combien de temps cela a pris, et
+combien d'octets ont été écrits dans le fichier final. Dans ce
+résumé vous avez aussi un emplacement appelé \emph{Display} dans
+lequel vous trouverez tous les messages affichés grâce à la
+directive \texttt{display} (voir section 2.2.5). Si l'erreur est
+liée à une ligne spécifique de votre code source, elle s'affichera
+alors dans le champ texte \emph{Instruction} contenant
+l'instruction qui a causé l'erreur et uniquement si une erreur
+apparaît lors de cette phase du pré-processeur (autrement ce champ
+reste vide). Ce résumé contient aussi le champ \emph{Source}, qui
+est une liste affichant les lignes de toutes les sources qui se
+réfèrent à cette erreur, lorsque l'on clique sur l'une des lignes
+de cette liste, la ligne ou se trouve l'erreur sera
+automatiquement sélectionnée dans l'éditeur (si le fichier n'est
+pas ouvert dans l'éditeur, il sera ouvert automatiquement).
+
+La commande \emph{Run} lance aussi le compilateur et, en cas de
+réussite de la compilation, il lancera la programme compilé si
+celui-ci est un format qui peut-être lancé dans un environnement
+Windows, autrement vous aurez un message vous indiquant que ce
+fichier ne peux pas être lancé. Si une erreur apparaît, le
+compilateur affichera une information identique à celle que l'on
+trouve avec la commande \emph{Compile} que l'on a utilisé.
+
+Si le compilateur vous indique qu'il n'y a pas assez de mémoire,
+vous pouvez accroître la mémoire normalement alloué via la boîte
+de dialogue \emph{Compiler setup}, dans le menu \emph{Options}.
+Dans ce menu vous pouvez donner le nombre de kilo-octets que le
+compilateur devra utiliser ainsi que la priorité du compilateur
+dans les processus système.
+
+\index{Introduction!Exécuter le compilateur via la ligne de
+commande}
+\subsection{Exécuter le compilateur via la ligne de commande}
+Pour compiler à partir de la ligne de commande vous devez exécuter
+l'executable \texttt{fasm.exe} avec deux paramètres - le nom de
+votre ficher source et le nom du fichier destination. Si aucun
+second paramètre n'est donné, le nom sera généré automatiquement
+(en fonction du nom du fichier source). Après l'affichage de
+quelques courtes informations à propos du nom du programme et de
+sa version, le compilateur lira les données du fichier source et
+lancera la compilation. Quand il aura fini, le compilateur écrira
+le code généré dans le fichier final et affichera un résumé du
+processus de compilation; sinon il affichera les erreurs qui sont
+apparues.
+
+Le fichier source devra être un fichier texte et peut être créé
+avec n'importe quel éditeur texte. Les caractères de fin de ligne
+sont aussi bien acceptés par les standards DOS et Unix, les
+tabulations sont considérées comme des caractères "espace".
+
+Vous pouvez aussi inclure dans la ligne de commande le paramètre
+\texttt{-m} suivi par un numéro, cela permettra à flat assembler
+de connaître le nombre de kilo-octets maximal qu'il doit utiliser.
+Pour la génération du fichier DOS seulement, cette option limite
+le nombre d'utilisation de la mémoire étendue. L'option
+\texttt{-p} suivi par un numéro peut être utilisé pour spécifier
+le nombre maximum de passages de l'assembleur. Si le code ne peut
+être généré dans le montant de passages spécifiés, l'assemblage se
+terminera avec un message d'erreur. La valeur maximum de cette
+option est 65536, alors que par défaut, si cette option n'est pas
+dans la ligne de commande, elle est de 100.
+
+Il n'y a aucune option qui pourrait affecter la sortie du
+compilateur, flat assembler demande seulement le code source comme
+information vraiment utile. Par exemple, pour spécifier un format
+de sortie différent, vous l'indiquez en utilisant la directive
+\texttt{format} au début de votre code source.
+
+\index{Introduction!Messages du compilateur en ligne de commande}
+\subsection{Messages du compilateur en ligne de commande}
+Après le succès de la compilation le compilateur affiche donc un
+résumé. Il nous donne le nombre de passages effectué, combien de
+temps cela a pris, et combien d'octets ont été écrits dans le
+fichier final. Voici un exemple d'un résumé de la compilation :
+\begin{verbatim}flat assembler  version 1.66
+38 passes, 5.3 seconds, 77824 bytes.
+\end{verbatim}
+En cas d'erreur pendant la phase de compilation, le programme
+affiche un message d'erreur. Par exemple, quand le compilateur ne
+trouve pas le fichier source, il affichera le message suivant :
+\begin{verbatim}flat assembler  version 1.66
+error: source file not found.
+\end{verbatim}
+Si l'erreur se trouve à un endroit particulier dans le code
+source, la ligne qui a causé l'erreur sera alors affichée. Le
+numéro de la ligne vous est donné pour que vous puissiez trouver
+l'erreur, par exemple :
+\begin{verbatim}flat assembler  version 1.66
+example.asm [3]:
+        mob     ax,1
+error: illegal instruction.
+\end{verbatim}
+A la 3$^{eme}$ ligne du fichier \texttt{example.asm}, le
+compilateur a rencontré une instruction inconnue. Lorsque la ligne
+qui a causé une erreur contient une macro-instruction, alors la
+ligne définissant cette macro et ayant générée une instruction
+incorrect est affiché :
+\begin{verbatim}flat assembler  version 1.66
+example.asm [6]:
+        stoschar 7
+example.asm [3] stoschar [1]:
+        mob     al,char
+error: illegal instruction.
+\end{verbatim}
+A la 6$^{eme}$ ligne du fichier \texttt{example.asm}, la
+macro-instruction a généré une instruction inconnue dans la
+1$^{ere}$ ligne de sa définition.
+
+\index{Introduction!Formats de sortie}
+\subsection{Formats de sortie}
+Par défaut, quand aucune directive \texttt{format} n'est donné
+dans le code source, flat assembler génère des codes
+d'instructions sur la sortie, créant ainsi un fichier binaire. Il
+génère par défaut du code 16 bits, mais vous pouvez le mettre en
+mode 16 bit ou en mode 32 bits simplement en utilisant les
+directives \texttt{use16} ou \texttt{use32}. Quelques formats de
+sortie, lorsqu'ils sont sélectionnés, se mettent en mode 32 bit -
+vous trouverez plus d'informations sur les formats utilisable dans
+la section 2.4.
+
+En fonction du format de sortie sélectionné, le compilateur choisi
+automatiquement le type d'extension du fichier de destination.
+
+Chaque code de sortie est toujours dans l'ordre dans lequel il a
+été entré dans le fichier source.
+
+\index{Introduction!Syntaxe de l'assembleur}
+\section{Syntaxe de l'assembleur}
+L'information fournie ci-dessous est prévue principalement pour
+les programmeurs qui ont utilisés d'autres compilateurs
+auparavant. Si vous êtes débutant, vous devriez jeter un oeil sur
+les tutoriaux de la programmation en assembleur.
+
+Flat assembler utilise par défaut la syntaxe Intel pour les
+instructions d'assemblage, cependant vous pouvez l'adapter en
+utilisant les possibilités du pré-processeur (macro-instructions
+et constantes symboliques). Aussi il a son propre ensemble de
+directives - les instructions pour le compilateur.
+
+Tous les symboles définis dans les sources respectent la
+différence entre majuscule/minuscule.
+\begin{table}[!h]
+    \begin{center}
+        \begin{tabular}{|c|c|c|}
+        \hline
+        Opérateur&Bits&Octets\\
+        \hline\hline
+        \verb"byte"&8&1\\
+        \hline
+        \verb"word"&16&2\\
+        \hline
+        \verb"dword"&32&4\\
+        \hline
+        \verb"fword"&48&6\\
+        \hline
+        \verb"pword"&48&6\\
+        \hline
+        \verb"qword"&64&8\\
+        \hline
+        \verb"tbyte"&80&10\\
+        \hline
+        \verb"tword"&80&10\\
+        \hline
+        \verb"dqword"&128&16\\
+        \hline
+        \end{tabular}
+    \end{center}
+    \caption{Taille des opérateurs}
+\end{table}
+%\begin{center}
+%    Table 1.1: Taille des opérateurs.
+%\end{center}
+
+\begin{table}[!h]
+    \begin{center}
+        \begin{tabular}{|c|c||c c c c c c c c|}
+        \hline
+        Types&Bits&&&&&&&&\\
+        \hline\hline
+        &8&\verb"al"&\verb"cl"&\verb"dl"&\verb"bl"&\verb"ah"&\verb"ch"&\verb"dh"&\verb"bh"\\
+        General&16&\verb"ax"&\verb"cx"&\verb"dx"&\verb"bx"&\verb"sp"&\verb"bp"&\verb"si"&\verb"di"\\
+        &32&\verb"eax"&\verb"ecx"&\verb"edx"&\verb"ebx"&\verb"esp"&\verb"ebp"&\verb"esi"&\verb"edi"\\
+        \hline
+        Segment&16&\verb"es"&\verb"cs"&\verb"ss"&\verb"ds"&\verb"fs"&\verb"gs"&&\\
+        \hline
+        Control&32&\verb"cr0"&&\verb"cr2"&\verb"cr3"&\verb"cr4"&&&\\
+        \hline
+        Debug&32&\verb"dr0"&\verb"dr1"&\verb"dr2"&\verb"dr3"&&&\verb"dr6"&\verb"dr7"\\
+        \hline
+        FPU&80&\verb"st0"&\verb"st1"&\verb"st2"&\verb"st3"&\verb"st4"&\verb"st5"&\verb"st6"&\verb"st7"\\
+        \hline
+        MMX&64&\verb"mm0"&\verb"mm1"&\verb"mm2"&\verb"mm3"&\verb"mm4"&\verb"mm5"&\verb"mm6"&\verb"mm7"\\
+        \hline
+        SSE&128&\verb"xmm0"&\verb"xmm1"&\verb"xmm2"&\verb"xmm3"&\verb"xmm4"&\verb"xmm5"&\verb"xmm6"&\verb"xmm7"\\
+        \hline
+        \end{tabular}
+    \end{center}
+    \caption{Les registres}
+\end{table}
+%\begin{center}
+%    Table 1.2: Les registres.
+%\end{center}
+
+\index{Introduction!Syntaxe des Instructions}
+\subsection{Syntaxe des Instructions}
+En assembleur, les instructions sont séparées par des sauts de
+ligne et il n'y a qu'une instruction par ligne. Si cette ligne
+contient un point-virgule, sauf si elle se trouve dans un texte
+délimité par des guillemets, le reste de la ligne est considéré
+comme un commentaire et ne sera donc pas pris en compte par le
+compilateur. Si une ligne se termine avec le caractère
+$\backslash$ (un commentaire peut suivre ce caractère), la ligne
+suivante se rattache à celle-ci.
+
+Chaque ligne dans le source est une suite d'éléments qui peut être
+un des trois types connus. Il y a les caractères symboliques, ce
+sont des caractères spéciaux qui sont uniques même lorsqu'ils ne
+sont pas espacés des autres. Chaque
+\texttt{+-*/=<>\(\)[]}\verb"{"\verb"}"\verb":"\texttt{,|\&}\verb"~"\texttt{\#`}
+est un caractère symbolique. Pour les autres caractères, séparés
+des autres éléments par des espaces ou par des caractères
+symboliques est un caractère symbolique. Si le 1$^{er}$ caractère
+est un «'» ou un «"», tous les caractères suivants, même les
+caractères spéciaux, deviennent une chaîne qui devra se terminer
+par le même caractère utilisé au début (apostrophe ou guillemet) -
+cependant si on trouve deux de ces caractères identiques qui se
+suivent (sans aucun caractère entre eux), ils sont intégrés dans
+la chaîne de caractères sans arrêter la délimitation de celle-ci.
+Les symboles autres que les caractères symboliques ou que les
+chaînes de caractères peuvent être utilisés comme étant des noms,
+aussi définies comme noms symboliques.
+
+Chaque instruction est représentée par un mnémonique (nom
+symbolique) et un nombre varié d'opérandes (constante, symbolique
+ou pas, ou une variable) séparé par des virgules. L'opérande peut
+être un registre, une valeur immédiate ou une donnée adressée en
+mémoire, il peut aussi être précédé par un opérateur de taille
+pour définir ou augmenter sa taille (Tableau 1.1). Les noms des
+registres disponibles sont dans le Tableau 1.2, leur taille ne
+peut être augmentée. Les valeurs immédiates peuvent être indiquées
+par une expression numérique.
+
+Quand l'opérande est une donnée en mémoire, l'adresse de cette
+donnée (ou expression numérique mais dans un registre) doit être
+mise entre crochets (\texttt{[ ]}) ou est précédé par l'opérateur
+\texttt{ptr}. Par exemple l'instruction \texttt{mov eax,3} met la
+valeur immédiate 3 dans le registre \texttt{eax}, l'instruction
+\texttt{mov eax,[7]} met la valeur (32 bit) se trouvant à
+l'adresse 7 dans le registre \texttt{eax} et l'instruction
+\texttt{mov byte [7],3} met la valeur immédiate 3 dans l'octet se
+trouvant à l'adresse 7, on peut aussi l'écrire \texttt{mov byte
+ptr 7,3}. Pour indiquer quel registre de segment doit être utilisé
+pour l'adressage, son nom suivi par deux points (\verb":") devra
+être mis juste avant la valeur de l'adresse (entre les crochets ou
+après l'opérateur \texttt{ptr}) :
+\begin{verbatim}    mov word [es:bx],ax
+\end{verbatim}
+
+\index{Introduction!Définitions des données}
+\subsection{Définitions des données}
+Pour définir une donnée ou réserver de la place pour elle, il faut
+utiliser une des directives donnée dans le Tableau 1.3. La
+directive de définition de donnée doit être suivie par une ou
+plusieurs expressions numériques séparées par des virgules.
+Suivant la directive utilisée ces expressions définissent la
+taille des valeurs pour les données. Par exemple \texttt{db 1,2,3}
+défini trois octets de valeur 1, 2 et 3.
+
+Les directives \texttt{db} et \texttt{du} acceptent aussi les
+chaînes de caractères de n'importe quelle taille, qui seront
+converties en octet (8 bits) quand \texttt{db} sera utilisé et en
+word (16 bits) avec la valeur haute égale à zéro (0) quand
+\texttt{du} est utilisé. Par exemple \texttt{db 'abc'} définira
+les 3 octets de valeurs 61, 62 et 63.
+
+Les directives \texttt{dp} et \texttt{df} acceptent les valeurs
+définies comme étant deux expressions numériques séparés par
+(\verb":"), la première valeur deviendra un mot (\texttt{word}) de
+poids fort, tandis que la seconde valeur sera un double word de
+poids faible de la valeur du pointeur en-dehors du segment
+courant. La directive \texttt{dd} accepte aussi ce type de
+pointeur composé de deux valeurs word séparées par (\verb":") et
+\texttt{dt} accepte comme valeur un word et un quadruple word
+séparées par (\verb":"), le quad word est stocké en premier. La
+directive \texttt{dt} avec une seule expression comme paramètre
+accepte les valeurs en virgule flottante et créé les données en
+FPU (Floating Point Unit/Unité de calcul en virgule flottante)
+format étendue double précision.
+
+Chacune de ces directives permet l'utilisation de l'opérateur
+spécial \texttt{dup} permet de faire des copies multiples de
+valeur. Le multiplicateur doit précédé cette directive et les
+valeurs à dupliquer sont après celle-ci - on peut mettre plusieurs
+valeurs, tant qu'elles sont séparées par des virgules et
+délimitées par des parenthèses, comme \texttt{db 5 dup (1,2)}, on
+défini 5 copies des deux octets soit, après la phase de
+pré-processus, \texttt{db 1,2,1,2,1,2,1,2,1,2}.
+
+\texttt{file} est une directive spéciale et sa syntaxe est
+différente. Cette directive inclut les octets d'un fichier et doit
+être suivi par le nom du fichier entre apostrophes, en option on
+peut ajouter une expression numérique indiquant l'offset du
+fichier précédé par (\verb":"), et on peut encore ajouter une
+dernière option permettant d'indiquer le nombre d'octets à
+inclure, mettre une virgule avant la valeur (s'il n'y a pas de
+valeur, toutes les données lues à partir de l'offset jusqu'à la
+fin du fichier seront inclus). Par exemple \texttt{file
+'data.bin'} insérera toutes les données du fichier binaire et
+\texttt{file 'data.bin'}\verb":"\texttt{10h,4} insérera seulement
+4 octets à partir de l'offset/adresse 10h.
+\begin{table}[!h]
+    \begin{center}
+        \begin{tabular}{|c||c|c|}
+        \hline
+        Taille&Définir les&Réserver les\\
+        (octets)&données&données\\
+        \hline\hline
+        1&\verb"db"&\verb"rb"\\
+        &\verb"file"&\\
+        \hline
+        2&\verb"dw"&\verb"rw"\\
+        &\verb"du"&\\
+        \hline
+        4&\verb"dd"&\verb"rd"\\
+        \hline
+        6&\verb"dp"&\verb"rp"\\
+        &\verb"df"&\verb"rf"\\
+        \hline
+        8&\verb"dq"&\verb"rq"\\
+        \hline
+        10&\verb"dt"&\verb"rt"\\
+        \hline
+        \end{tabular}
+    \end{center}
+    \caption{Directives des données}
+\end{table}
+
+La directive de réservation de donnée doit être suivi par une
+seule expression numérique, et cette valeur définie combien de
+zones mémoires, d'une taille spécifiée, doit être réservée. Toutes
+les directives de définition des données acceptent aussi la valeur
+\texttt{?} qui permet d'initialiser une zone mémoire avec
+n'importe quelle valeur, comme \texttt{label db ?} et l'effet est
+identique à la directive de réservation de données. La donnée non
+initialisée ne sera pas incluse dans le fichier final, donc ces
+valeurs devront toujours être considérées comme inconnues.
+
+\index{Introduction!Constantes et labels}
+\subsection{Constantes et labels}
+Dans les expressions numériques vous pouvez aussi utiliser des
+constantes ou des labels à la place des nombres. Pour définir une
+constante ou un label vous devrez utiliser des directives
+spécifiques. Chaque label doit être défini une seule fois et sera
+accessible de n'importe quel endroit du source (même avant qu'il
+soit défini). Une constante peut être redéfinie plusieurs fois,
+mais sera accessible uniquement après sa définition et sera
+toujours égale à la dernière valeur redéfinie avant l'endroit ou
+elle est utilisée. Quand une constante est définie une seule fois
+dans le source il est, comme pour le label, accessible de
+n'importe ou.
+
+La définition d'une constante se compose du nom de la constante
+suivi par le caractère "\texttt{=}" et d'une expression numérique,
+qui après calcul deviendra la valeur de cette constante. Cette
+valeur est toujours calculée au moment de la définition de la
+constante. Par exemple vous pouvez définir la constante
+\texttt{count} en utilisant la directive \texttt{count = 17}, et
+ainsi l'utiliser avec les instructions de l'assembleur comme
+\texttt{mov cv,count} - qui deviendra \texttt{mov cx,17} pendant
+le processus de compilation.
+
+Il y a différente façon de définir des labels. Le plus simple est
+de mettre le nom du label suivi par (\verb":"), cette directive
+peut être suivie par d'autres instructions sur la même ligne. Elle
+donne une valeur qui est son adresse. Cette méthode est utilisée
+pour définir un emplacement dans le code. L'autre façon est de
+faire suivre le nom du label (sans les (\verb":")) par une
+directive de donnée. Cela défini le label avec une valeur égale à
+l'adresse/offset de début de définition des données, et un label
+de donnée avec une taille comme il est spécifié dans le tableau
+1.3.
+
+Le label peut être considéré comme une constante de valeur égale à
+l'offset du code ou de la donnée fixé. Par exemple quand vous
+définissez une donnée utilisant cette directive \texttt{char db
+224}, pour mettre l'addresse de cette valeur dans le registre
+\texttt{bx} vous devrez utiliser l'instruction \texttt{mov
+bx,char}, et pour mettre la valeur d'un octet adressé par le label
+\texttt{char} dans le registre \texttt{dl}, vous devrez utiliser
+\texttt{mov dl,[char]} (ou \texttt{mov dl,ptr char}). Mais si vous
+essayez d'assembler \texttt{mov ax,[char]} cela donnera une
+erreur, car fasm compare la taille des opérandes qui doit toujours
+être égale. Vous pouvez forcer l'assemblage de cette instruction
+en utilisant un dépassement de taille: \texttt{mov ax,word
+[char]}, mais rappelez-vous que cette instruction lira les deux
+octets se trouvant à l'adresse \texttt{char} alors qu'il n'y à
+qu'un octet défini.
+
+La dernière et la plus flexible des manières de définir un label
+est d'utiliser la directive \texttt{label}. Cette directive doit
+être suivi par le nom du label puis, en option, de l'opérateur de
+taille et, encore en option, de l'opérateur \texttt{at} et de
+l'expression numérique indiquant l'adresse d'ou ce label devra
+être défini. Par exemple \texttt{label wchar word at char}
+définira un nouveau label (\texttt{wchar}) pour une donnée de 16
+bits (\texttt{word}) à l'adresse \texttt{char}. L'instruction
+\texttt{mov ax,[wchar]} deviendra après compilation la même chose
+que \texttt{mov ax,word [char]}. Si aucune adresse n'est indiquée,
+la directive \texttt{label} défini l'adresse du label à sa
+position courante. Ainsi \texttt{mov [wchar],57568} copiera deux
+octets tandis que \texttt{mov [char],224} copiera un seul octet à
+la même adresse.
+
+Le label qui a un nom commençant par un (\texttt{.}) sera
+considéré comme un label local, et son nom est attaché au nom du
+dernier label global (qui commence par n'importe quoi sauf un
+"\texttt{.}") pour faire le nom complet du label. Donc vous pouvez
+utilisez le nom court (commençant par un "\texttt{.}") de ce label
+n'importe ou avant la définition du prochain label global, et dans
+un autre endroit de votre source vous devez utilisez le nom
+complet. Il y a une exception avec les labels commençant par deux
+"\texttt{.}" - ils sont comme des labels globaux mais ne servent
+pas de préfixes pour les labels locaux.
+
+Le label anonyme est défini par \texttt{@@}, vous pouvez
+l'utiliser plusieurs fois dans votre source. Le symbole
+\texttt{@b} (et son équivalent \texttt{@r}) fait référence au
+précédent label anonyme, alors que le symbole \texttt{@r} fait
+référence au label anonyme suivant. Ces symboles spéciaux ne font
+pas de distinctions entre minuscule et majuscule.
+
+\index{Introduction!Expressions numériques}
+\subsection{Expressions numériques}
+Dans les exemples que nous venons de voir, toutes les expressions
+numériques ne sont que de simples nombres, constantes ou labels.
+Mais elles peuvent être plus complexes en utilisant des opérateurs
+arithmétiques ou logiques pour des calculs au moment de la
+compilation. Les priorités des ces opérateurs se trouvent dans le
+tableau 1.4. Les opérations avec une priorité élevée seront
+calculées en premier, bien sur vous pouvez changer le comportement
+du ces calculs en mettant certaines instructions
+entre-parenthèses. \texttt{+}, \texttt{-}, \texttt{*} et
+\texttt{/} sont les opérateurs arithmétiques standards,
+\texttt{mod} donne le reste d'une division. \texttt{and},
+\texttt{or}, \texttt{xor}, \texttt{shl}, \texttt{shr} et
+\texttt{not} ont la même fonction que les instructions assembleur
+de même nom. \texttt{rva} permet la conversion d'une adresse en un
+offset readressable et est spécifique à certain des formats de
+sortie (voir section 2.4).
+\begin{table}[!h]
+    \begin{center}
+        \begin{tabular}{|c|c|}
+        \hline
+        Priorité&Opérateurs\\
+        \hline\hline
+        0&\verb"+"\\
+        &\verb"-"\\
+        \hline
+        1&\verb"*"\\
+        &\verb"/"\\
+        \hline
+        2&\verb"mod"\\
+        \hline
+        3&\verb"and"\\
+        &\verb"or"\\
+        &\verb"xor"\\
+        \hline
+        4&\verb"shl"\\
+        &\verb"shr"\\
+        \hline
+        5&\verb"not"\\
+        \hline
+        6&\verb"rva"\\
+        \hline
+        \end{tabular}
+    \end{center}
+    \caption{Opérateurs arithmétiques et logiques par priorité}
+\end{table}
+
+Les nombre dans chaque expression est considéré comme un chiffre
+décimal, les nombres binaires doivent avoir la lettre \texttt{b}
+ajouté à la fin, un nombre octal se termine par la lettre
+\texttt{o}, les nombres hexadécimaux commencent avec \texttt{0x}
+(comme avec le langage C) ou avec le caractère \verb"$" (comme en
+Pascal) ou bien se termine avec la lettre \texttt{h}. De même pour
+les chaînes, lorsqu'on les rencontre dans une expression, seront
+converties en nombre - le premier caractère deviendra l'octet le
+moins significatif du nombre.
+
+L'expression numérique utilisée comme une adresse peut aussi
+contenir n'importe quels registres généraux utilisés pour
+l'adressage, ils peuvent être additionnés et multipliés par des
+valeurs appropriées, comme il est autorisé pour les instructions
+x86.
+
+Il y a aussi quelques symboles spéciaux qui peuvent être utilisés
+à l'intérieur de l'expression numérique. Premièrement il y a
+\verb"$", qui est toujours égale à la valeur de l'offset courant,
+tandis que \verb"$$" est égale à l'adresse de base de l'espace de
+l'adresse courante. Puis il y a \verb"%", qui est le nombre de
+répétition courante dans les parties du code qui sont répétées en
+utilisant quelques directives spéciales (voir section 2.2). Il y a
+aussi le symbole \verb"%t", qui est toujours égal à l'heure courante.
+
+Toute expressions numériques peuvent aussi être composées d'une
+simple valeur en virgule flottante en notation scientifique (flat
+assembler n'autorise pas toute opération en virgule flottante au
+moment de la compilation), elles peuvent se terminer par le
+caractère \texttt{f} pour être reconnues, autrement elles doivent
+contenir au moins le caractère \verb"." ou le caractère \verb"E".
+Donc \texttt{1.0}, \texttt{1E0} et \texttt{1f} exprime la même
+valeur en virgule flottante, alors qu'un simple \texttt{1} défini
+une valeur entière.
+
+\index{Introduction!Sauts et Appels}
+\subsection{\label{subsec:SautEtAppels}Sauts et Appels}
+L'opérande de toute instruction de saut ou d'appel peut être
+précédé pas seulement par l'opérateur de taille, mais aussi par
+les opérateurs indiquant le type du saut: \texttt{short},
+\texttt{near} ou \texttt{far} (\emph{ndt: respectivement : court,
+proche ou loin}). Par exemple, lorsque l'assembleur est en mode 16
+bits, l'instruction \texttt{jmp dword [0]} deviendra un saut
+lointain (far: en dehors du segment courant) et quand l'assembleur
+est en mode 32 bits, il deviendra un saut proche (near: dans le
+segment courant). Pour forcer l'instruction a être traitée
+différement, on utilise \texttt{jmp near dword [0]} ou \texttt{jmp
+far dword [0]}.
+
+Quand l'opérande d'un saut proche (near jump) est une valeur
+immédiate, l'assembleur générera une variante de cette instruction
+de saut plus courte, si cela lui est possible (mais ne créera pas
+d'instruction 32 bits dans un mode 16 ni d'instruction 16 bits
+dans un mode 32, à moins d'utiliser un opérateur de taille avec).
+En indiquant le type de saut vous pouvez le forcer à toujours
+générer une variante longue (par exemple \texttt{jmp near 0}) ou
+pour générer une variante courte qui se termine avec une erreur
+lorsque cela devient impossible (par exemple \texttt{jmp short
+0}).
+
+\index{Introduction!Réglage de la taille}
+\subsection{Réglage de la taille}
+Quand une instruction utilise quelque adressage de mémoire, la
+plus petite instruction est généré par défaut en utilisant le
+déplacement court si la valeur de l'adresse s'ajuste à la
+distance. Cela peut être dépassé en utilisant l'opérateur
+\texttt{word} ou \texttt{dword} avant l'adresse entre-crochets (ou
+après l'opérateur \texttt{ptr}), qui force le long déplacement
+d'une taille appropriée à être faite. Au cas où l'adresse n'est
+relatif à aucun registre, ces opérateurs autorisent de choisir le
+mode approprié d'adressage absolu.
+
+Les instructions \texttt{adc}, \texttt{add}, \texttt{and},
+\texttt{cmp}, \texttt{or}, \texttt{sbb}, \texttt{sub} et
+\texttt{xor} avec un premier opérande étant en mode 16 ou 32 bits
+sont, par défaut, générées sous la forme courte 8 bits quand le
+deuxième opérande est ajusté en une valeur signé de 8 bits. Il
+peut être augmenter en mettant l'opérande \texttt{word} ou
+\texttt{dword} avant la valeur immédiate. Les règles similaires
+s'appliquent à l'instruction \texttt{imul} avec la dernière
+opérande étant une valeur immédiate.
+
+Une valeur immédiate comme opérande pour l'instruction
+\texttt{push} sans opérateur de taille est considéré, par défaut,
+comme valeur "mot" (word), si l'assembleur est en mode 16 bits, et
+en double mot (dword) si l'assembleur est en mode 32 bits, si cela
+est possible on utilise la forme 8 bits de cette instruction,
+l'opérateur de taille \texttt{word} ou \texttt{dword} force
+l'instruction \texttt{push} d'être généré sous une forme longue de
+la taille spécifiée. Les mnémoniques \texttt{pushw} et
+\texttt{pushd} force l'assembleur a générer du code 16 ou 32 bits
+sans le forcer à utiliser une forme d'instruction longue.

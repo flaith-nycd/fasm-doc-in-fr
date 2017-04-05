@@ -1,0 +1,937 @@
+\chapter{Jeu d'instructions}
+Ce chapitre fourni les informations détaillées sur les
+instructions et les directives supportées par flat assembler. Les
+directives pour définir les labels ont été vues dans la
+sous-section 1.2.3, toutes les autres directives seront décrites
+plus tard dans ce chapitre.
+
+\section{Les instructions de l'architecture x86}
+Dans cette section vous trouverez les informations sur la syntaxe
+et le but des instructions du langage assembleur. Si vous avez
+besoin de plus d'informations techniques, veuillez vous reporter
+au Manuel du Développeur de Logiciel sous Architecture Intel sur
+le site
+\begin{verbatim}    http://www.intel.com/design/pentium4/manuals/index_new.htm
+\end{verbatim}
+
+Les instructions de l'assembleur se composent de mnémoniques (nom
+de l'instruction) et de zéro à trois opérandes. S'il y a deux
+opérandes ou plus, le premier est la destination et le second est
+la source. Chaque opérandes peut être un registre, une zone
+mémoire ou une valeur immédiate (voir section 1.2 pour avoir plus
+de détails sur la syntaxe des opérandes). Dans cette section il y
+a des exemples des différentes combinaisons d'opérandes (si
+l'instruction en est composée) après leur description.
+
+Quelques instructions se comportent comme un préfixe et peuvent
+être suivies par d'autres instructions sur la même ligne, et il
+peut y avoir plus d'un préfixe sur une ligne. Chaque nom de
+registre de segment est aussi un mnémonique d'un préfixe
+d'instruction, cependant il est recommandé d'utilisé un
+dépassement de segment que l'on définit à l'intérieur de crochets,
+à la place de ces prefixes.
+
+\subsection{Déplacement de données}
+\texttt{mov}\emph{(destination,source)} transfert un octet, mot ou
+double-mot de l'opérande source vers l'opérande destination, de
+cette façon :
+\begin{verbatim}    mov destination,source
+\end{verbatim}
+Il peut transférer des données entre des registres, d'un registre
+vers une zone mémoire, ou d'une zone mémoire vers un registre,
+mais il ne peut pas faire de déplacements de zone mémoire à zone
+mémoire. Il peut aussi transférer une valeur immédiate vers une
+zone mémoire ou une registre, d'un registre de segment vers un
+registre général ou une zone mémoire, registre général ou zone
+mémoire vers un registre de segment, d'un registre de contrôle ou
+de debug vers un registre général et réciproquement. L'assemblage
+de \texttt{mov} ne pourra s'effectuer que si la taille de
+l'opérande source et destination sont identiques. Voici les
+exemples de toutes les combinaisons possibles :
+\begin{verbatim}    mov bx,ax           ; registre général vers registre général
+    mov [char],al       ; registre général vers zone mémoire
+    mov bl,[char]       ; zone mémoire vers registre général
+    mov dl,32           ; Valeur immédiate vers registre général
+    mov [char],32       ; Valeur immédiate vers zone mémoire
+    mov ax,ds           ; registre de segment vers registre général
+    mov [bx],ds         ; registre de segment vers zone mémoire
+    mov ds,ax           ; registre général vers registre de segment
+    mov ds,[bx]         ; zone mémoire vers registre de segment
+    mov eax,cr0         ; registre de contrôle vers registre général
+    mov cr3,ebx         ; registre général vers registre de contrôle
+\end{verbatim}
+
+\texttt{xchg}\emph{(destination,source)} échange le contenu de
+deux opérandes. Il peut échanger deux opérandes de type octets,
+deux mots ou deux double-mot. L'ordre des opérandes n'est pas
+important. Les opérandes peuvent être des registres généraux ou
+des zones mémoires. Par exemple :
+\begin{verbatim}    xchg ax,bx          ; échange deux registres généraux
+    xchg al,[char]      ; échange un registre avec une zone mémoire
+\end{verbatim}
+
+\texttt{push} \emph{destination} décrémente l'indicateur du
+pointeur de pile (registre \texttt{esp}) et transfert l'opérande
+en haut de la pile désigné par \texttt{esp}. L'opérande peut être
+une zone mémoire, un registre général, un registre de segment ou
+une valeur immédiate de type octet, mot ou double-mot. Si
+l'opérande est une valeur immédiate et qu'aucune taille n'est
+indiquée alors il est considéré, par défaut, comme un mot (word)
+si l'assembleur est en mode 16 bits et en double-mot sir
+l'assembleur est en mode 32 bits. Les mnémoniques \texttt{pushw}
+et \texttt{pushd} sont les variantes de l'instruction qui stocke
+les valeurs d'un mot ou d'un double-mot. Si il y plusieurs
+opérandes sur la même ligne (séparées par des espaces et pas par
+des virgules), le compilateur assemblera la suite de ces
+instructions. Exemple avec des opérandes uniques :
+\begin{verbatim}    push ax             ; Stocke un registre général
+    push es             ; Stocke une registre de segment
+    push [bx]           ; Stocke une zone mémoire
+    push 1000h          ; Stocke une valeur immédiate
+
+    push ecx edx eax    ; Stocke plusieurs registres généraux
+\end{verbatim}
+
+\texttt{pusha} sauvegarde le contenu des huit registres généraux
+sur la pile. Cette instruction n'a aucune opérande. Il y a deux
+versions de cette instruction, une version 16 bits et un version
+32 bits, l'assembleur génère automatiquement la bonne version pour
+le mode courant, mais il peut être dépassé en utilisant les
+mnémoniques \texttt{pushaw} ou \texttt{pushad} pour toujours avoir
+la version 16 ou 32 bits. La version 16 bits empile les registres
+généraux sur la pile suivant cet ordre : \texttt{ax}, \texttt{cx},
+\texttt{dx}, \texttt{bx}, la valeur de \texttt{sp} avant que
+\texttt{ax} soit empilé, \texttt{bp}, \texttt{si} et \texttt{di}.
+Même chose pour la version 32 bits. Si on représente cette
+instruction comme un programme, nous avons :
+\begin{verbatim}    IF Taille_Operand = 16   ; instruction PUSHA
+       Temp = (SP)
+       Push(AX)
+       Push(CX)
+       Push(DX)
+       Push(BX)
+       Push(Temp)
+       Push(BP)
+       Push(SI)
+       Push(DI)
+    ELSE                     ; Taille_Operande = 32 => instruction PUSHAD
+       Temp = (ESP)
+       Push(EAX)
+       Push(ECX)
+       Push(EDX)
+       Push(EBX)
+       Push(Temp)
+       Push(EBP)
+       Push(ESI)
+       Push(EDI)
+    ENDIF
+\end{verbatim}
+
+\texttt{pop} \emph{destination} transfère le mot ou double-mot du
+haut de la pile vers l'opérande de destination puis incrémente
+\texttt{esp} pour pointer vers la nouvelle valeur du haut de la
+pile. L'opérande peut être une zone mémoire, un registre général
+ou un registre de segment. Les mnémoniques \texttt{popw} et
+\texttt{popd} sont les variantes de l'instruction qui récupère les
+valeurs d'un mot ou d'un double-mot. Si plusieurs opérandes sont
+sur la même ligne et séparées par des espaces, l'assembleur
+compilera la suite des instructions.
+\begin{verbatim}    pop bx              ; Restaure un registre général
+    pop ds              ; Restaure le segment de registre
+    popw [si]           ; Restaure une zone mémoire
+
+    pop eax edx ecx     ; Restaure plusieurs registres généraux
+                        ; Notez l'ordre des registres empilés par le push
+                        ; et l'ordre des registres dépilés par le pop
+\end{verbatim}
+
+\texttt{popa} restaure les registres sauvegardés sur la pile par
+l'instruction \texttt{pusha} à part la valeur de \texttt{sp} (ou
+\texttt{esp}), qui est ignorée. Cette instruction n'a pas
+d'opérandes. Pour forcer l'assemblage de cette instruction en mode
+16 ou 32 bits, il faut utiliser les mnémoniques \texttt{popaw} ou
+\texttt{popad}.
+
+\subsection{Conversion de type}
+Les instructions de conversions de types convertissent les octets
+en mots, mots en doubles-mot et doubles-mot en quadruples-mot. Ces
+conversions peuvent se faire en ajoutant une extension de signe ou
+une extension par zéro. L'extension de signe remplit les bits
+supplémentaires du plus grand élément avec la valeur du bit de
+signe du plus petit élément, l'extension de zéro remplit les bits
+supplémentaires par des zéros.
+
+\texttt{cwd} et \texttt{cdq} doublent la taille des valeurs des
+registres \texttt{ax} et \texttt{eax} et sauvegardent les bits
+supplémentaires dans les registres \texttt{dx} ou \texttt{edx}. La
+conversion s'effectue en utilisant l'extension de signe. Ces
+instructions n'ont pas d'opérandes.
+
+\texttt{cbw} étend le signe de l'octet du registre \texttt{al}
+faisant partie de \texttt{ax}, et \texttt{cwde} étend le signe du
+mot \texttt{ax} faisant partie de \texttt{eax}. Ces instructions
+n'ont pas d'opérandes.
+
+\texttt{movsx} converti un octet en mot ou double-mot et un mot en
+double-mot avec l'extension de signe. \texttt{movzx} fait la même
+chose, mais il utilise l'extension par zéro. L'opérande source
+peut être un registre général ou une zone mémoire, alors que
+l'opérande de destination doit être un registre général. Par
+exemple :
+\begin{verbatim}    movsx ax,al         ; registre octet vers registre mot
+    movsx edx,dl        ; registre octet vers registre double-mot
+    movsx eax,ax        ; registre mot vers registre double-mot
+    movsx ax,byte [bx]  ; zone mémoire octet vers registre mot
+    movsx edx,byte [bx] ; zone mémoire octet vers registre double-mot
+    movsx eax,word [bx] ; zone mémoire mot vers registre double-mot
+\end{verbatim}
+
+\subsection{Les instructions de l'arithmétique binaire}
+\texttt{add}\emph{(destination,source)} remplace l'opérande de
+destination avec la somme des opérandes source et destination et
+met l'indicateur \texttt{CF} (Carry Flag : le drapeau de retenue)
+à 1 si un débordement se produit. Les opérandes peuvent être des
+octets, mots ou doubles-mot. L'opérande destination peut être un
+registre général ou une zone mémoire, l'opérande source un
+registre général ou une valeur immédiate, il peut aussi être une
+zone mémoire si la destination est un registre.
+\begin{verbatim}    add ax,bx           ; Additionne un registre à un registre
+    add ax,[si]         ; Additionne une zone mémoire à un registre
+    add [di],al         ; Additionne un registre à une zone mémoire
+    add al,48           ; Additionne une valeur immédiate à un registre
+    add [char],48       ; Additionne une valeur immédiate à une zone mémoire
+\end{verbatim}
+
+\texttt{adc}\emph{(destination,source)} fait la somme des
+opérandes, ajoute 1 si l'indicateur \texttt{CF} est positionné, et
+remplace l'opérande de destination par le résultat. Cette
+instruction suit les mêmes règles que l'instruction \texttt{add}.
+\texttt{add} suivit par plusieurs instructions \texttt{adc} peut
+être utilisé pour additionner des nombres supérieurs à 32 bits.
+
+\texttt{inc} \emph{destination} ajoute 1 à l'opérande, il
+n'affecte pas \texttt{CF}. L'opérande peut être un registre
+général ou une zone mémoire, et la taille de celle-ci peut être un
+octet, un mot ou un double-mot.
+\begin{verbatim}    inc ax              ; Incrémente le registre par 1
+    inc byte [bx]       ; Incrémente la zone mémoire par 1
+\end{verbatim}
+
+\texttt{sub}\emph{(destination,source)} soustrait l'opérande
+source de l'opérande destination et remplace la destination par le
+résultat. L'indicateur de retenue \texttt{CF} est posé si le
+résultat ne tient pas dans la destination. Cette instruction suit
+les mêmes règles que l'instruction \texttt{add}.
+
+\texttt{sbb}\emph{(destination,source)} soustrait l'opérande
+source de l'opérande destination et soustrait 1 si l'indicateur
+\texttt{CF} est posé, et stocke le résultat dans l'opérande de
+destination. Cette instruction suit les mêmes règles que
+l'instruction \texttt{add}. \texttt{sub} suivit par plusieurs
+instructions \texttt{sbb} peut être utilisé pour soustraire des
+nombres plus grand que 32 bits.
+
+\texttt{dec} \emph{destination} soustrait 1 à l'opérande, il
+n'affecte pas l'indicateur \texttt{CF}. Cette instruction suit les
+même règles que l'instruction \texttt{inc}.
+
+\texttt{cmp}\emph{(destination,source)} soustrait l'opérande
+source de l'opérande destination. Il met à jour les indicateurs
+comme pour l'instruction \texttt{sub}, mais ne modifie pas la
+source et la destination. Cette instruction suit les même règles
+que l'instruction \texttt{sub}.
+
+\texttt{neg} \emph{destination} soustrait un entier signé de zéro.
+L'effet de cette instruction est de transformer le signe de
+l'opérande de négatif à positif ou inversement. Cette instruction
+suit les même règles que l'instruction \texttt{inc}.
+
+\texttt{xadd}\emph{(destination,source)} échange l'opérande de
+destination avec l'opérande source, puis il charge la somme de ces
+deux valeurs dans l'opérande de destination. Cette instruction
+suit les même règles que l'instruction \texttt{add}. Exemple :
+\begin{verbatim}    mov bx,1200         ; bx = 1200
+    mov dx,2500         ; dx = 2500
+    xadd bx,dx          ; bx = 3700 - dx = 1200
+\end{verbatim}
+
+Toutes ces instructions arithmétiques binaires modifient les
+indicateurs \texttt{SF} \emph{(Sign Flag : indicateur de signe -
+bit 7)}, \texttt{ZF} \emph{(Zero Flag : indicateur de zéro - bit
+6)}, \texttt{PF} \emph{(Parity Flag : indicateur de parité - bit
+2)} et \texttt{OF} \emph{(Overflow Flag : indicateur de
+débordement - bit 11)}. L'indicateur \texttt{SF} a la même valeur
+que le résultat du bit de signe, \texttt{ZF} est mis à 1 quand le
+résultat d'une opération donne 0 (zéro), \texttt{PF} est mis à 1
+quand les 8 bits de poids faibles du résultat d'une opération
+contient un nombre pair de bits égaux à 1, \texttt{OF} est mis à 1
+si le résultat est trop grand pour un nombre positif ou trop petit
+pour un nombre positif (bit de signe exclu).
+
+\texttt{mul} \emph{source} exécute une multiplication non-signée
+de l'opérande source et de l'accumulateur. Si l'opérande est un
+octet, le processeur le multiplie par le contenu du registre
+\texttt{al} et retourne le résultat au format 16 bits dans
+\texttt{ah} et \texttt{al}. Si l'opérande est un mot, le
+processeur le multiplie le contenu de \texttt{ax} et retourne le
+résultat au format 32 bits dans les registres \texttt{dx} et
+\texttt{ax}. Si l'opérande est un double-mot, le processeur le
+multiplie par le contenu de \texttt{eax} et retourne le résultat
+au format 64 bits dans les registres \texttt{edx} et \texttt{eax}.
+\texttt{mul} met à 1 les indicateurs \texttt{CF} et \texttt{OF}
+quand la moitié haute du résultat est différent de 0, autrement
+ces indicateurs sont mis à 0. Cette instruction suit les même
+règles que l'instruction \texttt{inc}.
+
+\texttt{imul} effectue une multiplication signée. Cette
+instruction a trois variantes. La première n'a qu'une seule
+opérande (\texttt{imul} \emph{source}) et se comporte de la même
+façon que l'instruction \texttt{mul}. La seconde a deux opérandes
+(\texttt{imul}\emph{(destination,source)}), l'opérande destination
+est multiplié à l'opérande source et le résultat est mis dans la
+destination. L'opérande destination doit être un registre général,
+un mot ou un double-mot, l'opérande source est un registre
+général, une zone mémoire ou une valeur immédiate. La troisième
+variante a trois opérandes (\texttt{imul}\emph{(destination,
+source1, source2)}), l'opérande destination doit être un registre
+général, un mot ou un double-mot, l'opérande source1 est un
+registre général ou une zone mémoire, et le dernier opérande
+source2 doit être une valeur immédiate. L'opérande source1 est
+multiplié par l'opérande source2 (une valeur immédiate) et le
+résultat est stocké dans l'opérande destination. Ces trois formes
+calculent le produit de la taille des opérandes par deux et
+mettent \texttt{CF} et \texttt{OF} à 1 quand la moitié haute du
+résultat est différent de zéro, mais la seconde et troisième
+variante de cette instruction tronque le produit de la taille des
+opérandes, ces variantes peuvent donc aussi être utilisées pour
+des opérandes non-signées car, que les opérandes soient signées ou
+non, la moitié basse du produit est identique. Voici des exemples
+de ces trois variantes :
+\begin{verbatim}    imul bl         ; Accumulateur par registre
+    imul word [si]  ; Accumulateur par zone mémoire
+    imul bx,cx      ; Registre par registre
+    imul bx,[si]    ; Registre par zone mémoire
+    imul bx,10      ; Registre par valeur immédiate
+    imul ax,bx,10   ; bx * 10 => registre ax
+    imul ax,[si],10 ; Zone mémoire par valeur immédiate vers registre
+\end{verbatim}
+
+\texttt{div} \emph{source} effectue une division non-signée de
+l'accumulateur par l'opérande. Le dividende (accumulateur) est
+deux fois la taille du diviseur (opérande source), le quotient et
+le reste de la division ont la même taille que le diviseur. Si le
+diviseur est un octet, le dividende sera alors le registre
+\texttt{ax}, le quotient est stocké dans \texttt{al} et le reste
+dans \texttt{ah}. Si le diviser est un mot, la moitié haute du
+dividende est pris du registre \texttt{dx}, la moitié basse du
+dividende est pris du registre \texttt{ax}, le quotient est stocké
+dans \texttt{ax} et le reste dans \texttt{dx}. Si le diviseur est
+une double-mot, la moitié haute du dividende est pris du registre
+\texttt{edx}, la partie basse du dividende est pris du registre
+\texttt{eax}, le quotient est stocké dans \texttt{eax} et le reste
+dans \texttt{edx}. Cette instruction suit les même règles que
+l'instruction \texttt{mul}.
+
+\texttt{idiv} \emph{source} effectue une division signée de
+l'accumulateur par l'opérande. Il utilise les mêmes registres que
+l'instruction \texttt{div} et suit les mêmes règles que cette
+opérande.
+
+\subsection{Les instructions de l'arithmétique décimale}
+L'arithmétique décimal s'effectue en combinant l'arithmétique
+binaire (décrite dans la section précédente) avec les instructions
+de l'arithmétique décimal. Ces instructions sont utilisées pour
+ajuster une précédente opération arithmétique binaire pour
+produire un résultat décimal compacté ou non compacté valide, ceci
+afin d'ajuster les prochaines entrées d'une opération arithmétique
+binaire, l'opération produira un résultat décimal compacté ou non
+compacté valide.
+
+\texttt{daa} ajuste en \texttt{al} le résultat d'une addition de
+deux nombres décimaux compactés, \texttt{daa} doit toujours suivre
+l'addition de deux nombres décimaux compactés (un chiffre pour
+chaque demi-octet) pour obtenir comme résultat deux nombre
+décimaux compactés valides. L'indicateur de retenue est mis à 0 si
+le contenu est correct (entre 0 et 99 car les chiffres sont
+représentés en BCD \emph{Binary Coded Decimal - Décimal Codé en
+Binaire}). Cette instruction est sans opérande.
+
+\texttt{das} ajuste en \texttt{al} le résultat d'une soustraction
+de deux nombres décimaux compactés, \texttt{das} doit toujours
+suivre la soustraction de deux nombres décimaux compactés (un
+chiffre pour chaque demi-octet) pour obtenir comme résultat deux
+nombre décimaux compactés valides. L'indicateur de retenue
+\texttt{CF} est mis à 1 s'il y a dépassement (> 99). Cette
+instruction est sans opérande.
+
+\texttt{aaa} change le contenu du registre \texttt{al} en un
+nombre décimal non compacté valide, et rempli de zéros les quatre
+bits (ou quartet) de poids fort. \texttt{aaa} doit toujours suivre
+l'addition des deux opérandes décimales non compactées dans
+\texttt{al}. L'indicateur de retenue est posé et \texttt{ah} est
+incrémenté si une retenue est nécessaire. Cette instruction est
+sans opérande. Exemple :
+\begin{verbatim}    mov ah,8
+    mov al,4
+    add al,ah       ; al = al + ah --> al = $0C
+    xor ah,ah       ; ah = 0
+                    ; on ajuste au format BCD
+    aaa             ; ah = 1 et al = 2
+\end{verbatim}
+
+\texttt{aas} change le contenu du registre \texttt{al} en un
+nombre décimal non compacté valide, et rempli de zéros les quatre
+bits (ou quartet) de poids fort. \texttt{aas} doit toujours suivre
+la soustraction des deux opérandes décimales non compactées dans
+\texttt{al}. Si la soustraction produit une retenue, le registre
+\texttt{ah} est incrémenté, et les indicateurs \texttt{CF} et
+\texttt{AF} \emph{(AF : Auxiliary Flag - Indicateur de retenue
+auxiliaire)} sont mis à 1. Dans le cas contraire \texttt{CF} et
+\texttt{AF} sont mis à 0 et \texttt{ah} reste inchangé. Cette
+instruction est sans opérande.
+
+\texttt{aam} corrige le résultat d'une multiplication de deux
+nombres décimaux non compactés valides. \texttt{aam} doit toujours
+suivre une multiplication de deux nombres décimaux pour produire
+un résultat décimal valide. Le chiffre de poids fort est stocké
+dans \texttt{ah}, le chiffre de poids faible dans \texttt{al}. La
+version généralisée de cette instruction permet à l'ajustement du
+contenu du registre \texttt{ax} de créer deux chiffres non
+compactées. \texttt{aam} décompacte le résultat dans \texttt{al}
+en divisant al par 10, laissant le quotient (chiffre de poids
+fort) dans \texttt{ah} et le reste (chiffre de poids faible) dans
+\texttt{al}. Cette instruction n'a pas d'opérandes. Exemple :
+\begin{verbatim}    mov al,8
+    mov cl,4
+    mul cl          ; ax = al * cl --> ax = 32 ($20)
+                    ; on ajuste le résultat
+    aam             ; ah = 3 et al = 2
+\end{verbatim}
+
+\texttt{aad} prépare deux valeurs décimales non compactés à être
+traité par une division et modifie le numérateur dans \texttt{al}
+et \texttt{ah}, ainsi le quotient produit par la division sera un
+nombre décimal non compacté. \texttt{ah} contient le chiffre de
+poids fort et \texttt{al} le chiffre de poids faible. Cette
+instruction ajuste la valeur et met le résultat dans \texttt{al}
+tandis que \texttt{ah} sera égal à zéro. Cette instruction suit
+les même règles que l'instruction \texttt{aam}. Exemple :
+\begin{verbatim}    mov al,8
+    mov ah,4
+    aad             ; prépare ax à une division
+                    ; après cette instruction al = 48 et ah = 0
+\end{verbatim}
+
+\subsection{Instructions logiques}
+L'instruction \texttt{not} inverse les bits de l'opérande, ce qui
+permet de faire le complément à un de cette opérande. Il n'a aucun
+effet sur les indicateurs (flags). Cette instruction suit les même
+règles que l'instruction \texttt{inc}.
+
+Les instructions \texttt{and}, \texttt{or} et \texttt{xor}
+exécutent les opérations standards logiques. Ils modifient les
+indicateurs \texttt{SF} \emph{(Indicateur de Signe-Bit 7)},
+\texttt{ZF} \emph{(Indicateur de Zéro-Bit 6)} et \texttt{PF}
+\emph{(Indicateur de Parité-Bit 2)}. Cette instruction suit les
+même règles que l'instruction \texttt{add}.
+
+Les instructions \texttt{bt}\emph{(destination,source)},
+\texttt{bts}, \texttt{btr} et \texttt{btc} opèrent sur un seul bit
+d'une zone mémoire ou d'un registre général. Le rang du bit à
+tester est indiqué par la position du bit de l'opérande source
+(deuxième opérande), qui peut être une valeur immédiate ou un
+registre. Ces instructions extrait le bit de l'opérande
+destination et le met dans l'indicateur \texttt{CF}. L'instruction
+\texttt{bt} ne fait rien d'autre, \texttt{bts} met le bit
+sélectionné à 1, \texttt{btr} fait l'inverse, il met le bit
+sélectionné à 0 et \texttt{btc} inverse le bit sélectionné. Le
+premier opérande peut être un mot ou un double-mot. Exemple :
+\begin{verbatim}    bt  ax,15           ; Teste le bit 15 du registre ax
+    bts word [bx],15    ; Test et met le bit 15 de la mémoire à 1
+    btr ax,cx           ; Test et met le bit de cx dans ax à 0
+    btc word [bx],cx    ; Test et inverse le bit de cx dans la mémoire
+
+    mov ax,1000000000000000b    ; ax = 32768
+    bt  ax,1000000000000000b    ; test le bit 15 de ax
+\end{verbatim}
+
+Les instructions \texttt{bsf}\emph{(destination,source)} et
+\texttt{bsr} recherchent le premier bit d'un mot ou d'un
+double-mot et stocke l'index de ce bit dans l'opérande destination
+qui est un registre général. Le bit recherché est indiqué par
+l'opérande source qui est un registre ou une zone mémoire. Si la
+recherche aboutit l'indicateur \texttt{ZF} est mis à 1 et
+l'opérande source contient l'index du bit. Si aucun bit n'est
+trouvé, la source et l'indicateur \texttt{ZF} sont mis à 0.
+\texttt{bsf} fait une recherche en partant du bit 0 et en
+remontant vers le bit de poids fort. \texttt{bsr} fait une
+recherche en partant du bit de poids fort (bit 31 pour un
+double-mot, bit 15 pour un mot) et redescend vers le bit 0.
+\begin{verbatim}    bsf ax,bx           ; Recherche 1er bit à 1 dans ax
+                        ; met l'index dans bx en partant du bit 0
+    bsr ax,[si]         ; Recherche le 1er bit à 1 dans ax
+                        ; met l'index dans zone mémoire [si] en
+                        ; partant du bit 15 vers bit 0
+\end{verbatim}
+
+\texttt{shl}\emph{(destination,source)} décale vers la gauche
+l'opérande destination par le nombre de bits indiqué par
+l'opérande source. L'opérande destination peut être un octet, un
+mot, un double mot d'un registre général ou une zone mémoire.
+L'opérande source peut être une valeur immédiate ou le registre
+\texttt{cl}. \texttt{shl} rempli de zéro à partir de la droite de
+l'opérande (poids faible) et les bits disparaissent à gauche. Le
+dernier bit décalé vers la gauche est stocké dans l'indicateur
+\texttt{CF}. L'instruction \texttt{sal} est identique à
+l'instruction \texttt{shl}.
+\begin{verbatim}    shl al,1            ; Décale le registre al d'un bit vers la gauche
+                        ; => Correspond à une multiplication par 2
+    shl byte [bx],1     ; Décale la zone mémoire d'un bit vers la gauche
+    shl ax,cl           ; Décale vers la gauche le registre ax
+                        ; du nombre de bits indiqué dans cl
+    shl word [bx],cl    ; Décale vers la gauche la zone mémoire
+                        ; du nombre de bits indiqué dans cl
+\end{verbatim}
+
+\texttt{shr}\emph{(destination,source)}, et \texttt{sar}, décale
+vers la droite la destination par le nombre de bits indiqué par la
+source. Cette instruction suit les même règles que l'instruction
+\texttt{shl}. \texttt{shr} rempli de zéro à partir de la gauche de
+l'opérande et les bits disparaissent à droite. Le dernier bit
+décalé vers la droite est stocké dans l'indicateur \texttt{CF}.
+Par contre l'instruction \texttt{sar} préserve le signe de
+l'opérande en le décalant par des zéros si la valeur est positive
+et par des uns si la valeur est négative.
+\begin{verbatim}    shr al,1            ; Décale le registre al d'un bit vers la droite
+                        ; => Correspond à une division par 2
+    shr al,2            ; Décale le registre al de deux bits vers la droite
+                        ; => Correspond à une division par 4
+\end{verbatim}
+
+% Ajout du 01/12/2010
+\texttt{shld}\emph{(destination,source,nombre)} décale vers la gauche
+les bits de l'opérande source du nombre de positions donné par le
+troisième opérande, le résultat est mis dans la destination sans
+modification de l'opérande source. La destination peut être de
+type Mot ou Double-Mot, un registre général ou une zone mémoire,
+la source doit être de type registre général et le troisième opérande
+peut être une valeur immédiate ou le registre \texttt{cl}.
+\begin{verbatim}    shld ax,bx,1        ; décale le registre bx de 1 bit et le met dans ax
+    shld [di],bx,1      ; décale bx de 1 bit
+                        ; et met le résultat dans la zone mémoire [di]
+    shld ax,bx,cl       ; décale bx du nombre donné par cl :
+                        ; résultat dans ax
+    shld [di],bx,cl     ; décale bx du nombre donné par cl
+                        ; et met le résultat dans [di]
+\end{verbatim}
+
+\texttt{shrd}\emph{(destination,source,nombre)} décale vers la droite
+les bits de l'opérande source du nombre de positions donné par l'opérande
+nombre, le résultat est mis dans la destination. L'opérande source
+n'est pas modifié. Les règles sont les mêmes que l'instruction \texttt{shld}.
+
+\texttt{rol} et \texttt{rcl}\emph{(destination,source)} décale, l'Octet,
+Mot ou Double-Mot, vers la gauche les bits de la destination par le nombre
+indiqué par l'opérande source. Pour \texttt{rol} : à chaque rotation le bit
+de poids fort (bit le plus à gauche) qui sort par la gauche est placé à
+droite dans le bit de poids faible (bit '0').
+\texttt{rcl} effectue la même chose sauf que le premier bit est placé dans
+l'indicateur \texttt{CF} après que le contenu de cet indicateur ait été placé
+dans le bit '0' de la destination. Ces instructions suivent les mêmes règles
+que l'instruction \texttt{shl}.
+
+\texttt{ror} et \texttt{rcr}\emph{(destination,source)} décale, l'Octet,
+Mot ou Double-Mot, vers la droite les bits de la destination par le nombre
+indiqué par l'opérande source. Pour \texttt{ror} : à chaque rotation le bit
+de poids faible (bit le plus à droite) qui sort par la droite est placé à
+gauche dans le bit de poids fort.
+\texttt{rcr} effectue la même chose sauf que le dernier bit est placé dans
+l'indicateur \texttt{CF} aprés que le contenu de cet indicateur ait été placé
+dans le bit de poids fort de la destination. Ces instructions suivent les mêmes
+règles que l'instruction \texttt{shl}.
+
+\texttt{test}\emph{(destination,source)} agit de la même façon que
+l'instruction \texttt{and}, à la seule différence qu'il n'altère pas la
+l'opérande de destination, il met juste les flags à jour.
+Cette instruction suit la même règle que l'instruction \texttt{and}.
+
+\texttt{bswap}\emph{(destination)} permute l'ordre des octets d'un registre
+général de 32 bits. Il permute les bits 0 à 7 avec les bits 24 à 31 et les
+bits 8 à 15 avec les bits 16 à 23. Cette instruction est mise à disposition
+pour la conversion des valeurs de type "little-endian" vers un format de type
+"big-endian" et réciproquement.
+\begin{verbatim}    bswap edx           ; permute les octets du registre edx
+\end{verbatim}
+
+\subsection{Les instructions de contrôle de transfert}
+\texttt{jmp}\emph{(destination)} transfert le contrôle, d'une
+façon inconditionnelle, à la destination. L'adresse de
+destination peut être spécifiée directement dans l'instruction
+ou indirectement par un registre ou une zone mémoire, la taille de
+cette adresse dépend si le saut est proche ou lointain
+\emph{(appelé aussi appel inter-segment)}(on peut le définir en
+ajoutant les opérateurs \texttt{'near'} ou \texttt{'far'} avant
+l'opérande) et si l'instruction est en 16 ou 32 bits. L'opérande a
+utiliser pour les sauts \texttt{'near'} doit être \texttt{word}
+pour les instructions 16 bits et \texttt{dword} pour les instructions
+32 bits. Pour les sauts \texttt{'far'}, on utilise \texttt{dword} pour
+les instructions en 16 bits ou \texttt{pword} pour les instructions
+32 bits. Une instruction directe \texttt{jmp} a obligatoirement
+l'adresse de destination (on peut la précéder de l'opérateur \texttt{short},
+\texttt{near} ou \texttt{far}), l'opérande indiquant l'adresse doit
+être une expression numérique pour les sauts de type \texttt{near}
+ou \texttt{short}, ou deux expressions numériques séparées par \verb"':'"
+pour les sauts \texttt{far}, la première expression indique le segment et
+le deuxième est l'offset à l'intérieur de ce segment. L'opérateur
+\texttt{pword} peut être utilisé pour forcer un saut de type \texttt{far}
+32 bits, et \texttt{dword} pour un saut \texttt{far} 16 bits.
+Une instruction indirecte \texttt{jmp} nous donne l'adresse de destination
+indirectement par un registre ou une variable pointeur, l'opérande utilisé
+doit être un registre ou une zone mémoire. Voir section~\ref{subsec:SautEtAppels}
+pour plus de détails.
+\begin{verbatim}    jmp 100h            ; saut direct proche (near)
+    jmp 0FFFFh:0        ; saut direct lointain (far)
+    jmp ax              ; saut indirect proche
+    jmp pword [ebx]     ; saut indirect lointain
+\end{verbatim}
+
+\texttt{call}\emph{(destination)} appelle une procédure ou
+sous-programme, l'adresse de l'instruction suivant le \texttt{call}
+est sauvegardée sur la pile, l'adresse de retour sera alors lue
+lors de l'utilisation de l'instruction \texttt{ret} (return).
+Cette instruction suit la même règle que l'instruction \texttt{jmp},
+sauf que \texttt{call} n'a aucune version courte pour une instruction
+directe et n'est donc pas optimisé.
+
+\texttt{ret}, \texttt{retn} et \texttt{retf} mettent fin au
+sous-programme et redonnent le contrôle au programme appelant
+en utilisant l'adresse sauvegardée sur la pile par l'instruction
+\texttt{call}. \texttt{ret} est identique à \texttt{retn}, elle revient
+de la procédure qui a été executée par un \texttt{call} de type
+\texttt{'near'}, alors que \texttt{retf} revient d'un call de type
+\texttt{'far'}. Ces instructions ont une taille par défaut en fonction
+des paramètres du code, la taille de l'adresse peut être forcée à 16 bits
+en utilisant les instructions \texttt{retw}, \texttt{retnw} et \texttt{retfw},
+et à 32 bits par l'utilisation des instructions \texttt{retd},
+\texttt{retnd} et \texttt{retfd}. En option, on peut ajouter une opérande
+immédiate à ces instructions, en ajoutant cette constante au pointeur de la
+pile, tous les arguments mis sur la pile, que le programme appelant a passé,
+sont effacés avant l'execution de l'instruction \texttt{call}.
+
+\texttt{iret} redonne le contrôle d'une procédure d'interruption.
+Elle diffère de \texttt{ret} car elle retourne aussi les 'flags'
+de la pile dans le registre des flags. Ces flags sont sauvegardés
+sur la pile par le mécanisme de l'interruption. La taille de l'adresse
+de retour est définie en fonction des paramètres du code,
+mais peut-être forcée à 16 ou 32 bits par l'utilisation des instructions
+\texttt{iretw} ou \texttt{iretd}.
+
+Les instructions de transferts conditionnels sont des sauts qui
+transfèrent ou non le contrôle en fonction du statut des flags du CPU
+quand l'instruction s'exécute. Les mnémoniques pour les sauts
+conditionnels peuvent être obtenus en ajoutant le mnémonique de condition
+adéquat (voir tableau 2.1) au mnémonique \texttt{'j'}, par exemple
+l'instruction \texttt{jc} transfert le contrôle si le flag \texttt{CF}
+est défini. Les sauts conditionnels peuvent être de type \texttt{short}
+ou \texttt{near}, uniquement directs, et peuvent être optimisés
+(voir~\ref{subsec:SautEtAppels}), l'opérande doit être une valeur immédiate
+indiquant l'adresse de destination.
+
+Les instructions \texttt{loop}\emph{(destination)} sont des sauts
+conditionnels utilisant une valeur placée dans \texttt{cx} (ou \texttt{ecx}),
+celle-ci donne le nombre de répétition à effectuer dans la boucle du programme.
+Toutes les instructions \texttt{loop} décrémentent automatiquement
+la valeur du registre \texttt{cx} (ou \texttt{ecx}) et termine la
+boucle (sans donner le contrôle) quand \texttt{cx} (ou \texttt{ecx})
+est égal à zéro. Ils utilisent \texttt{cx} ou \texttt{ecx} si les paramétres
+du code actuel est en 16 ou 32 bits, mais on peut forcer l'utilisation de
+\texttt{cx} avec l'instruction \texttt{loopw} \emph{(cx : 16 bits et
+loopw : word)} ou l'utilisation de \texttt{ecx} avec \texttt{loopd}.
+\texttt{loope} et \texttt{loopz} sont similaires à l'instruction \texttt{loop}
+mais termine aussi la boucle quand le flag \texttt{ZF} est défini.
+\texttt{loopew} et \texttt{loopzw} forcent l'utilisation du registre
+\texttt{cx} alors que \texttt{looped} et \texttt{loopzd} force l'utilisation
+de \texttt{ecx}. \texttt{loopne} et \texttt{loopnz} sont identiques à
+l'instruction \texttt{loop} sauf que la boucle peut aussi se terminer quand
+le flag \texttt{ZF} n'est pas défini. Les mnémoniques \texttt{loopnew} et
+\texttt{loopnzw} forcent l'utilisation du registre \texttt{cx} alors que
+\texttt{loopned} et \texttt{loopnzd} forcent l'utilisation du registre
+\texttt{ecx}. Chaque instruction \texttt{loop} requiert une valeur immédiate
+indiquant l'adresse de destination qui ne peut être qu'un saut court
+(saut maximum de 128 octets avant et 127 octets après l'adresse suivant
+l'instruction \texttt{loop}).
+
+\texttt{jcxz}\emph{(destination)} saute au label indiqué dans la destination si
+la valeur du registre \texttt{cx} est égale à zéro, \texttt{jecxz} fait la même
+chose mais vérifie la valeur dans le registre \texttt{ecx}. Ces opérandes
+suivent les mêmes règles que l'instruction \texttt{loop}
+
+\texttt{int}\emph{(valeur)} déclenche une interruption donnée pas le numéro
+indiqué dans l'opérande valeur, celui-ci doit être compris entre 0 et 255.
+La routine d'interruption se termine par l'instruction \texttt{iret} et
+redonne le contrôle à l'instruction suivant le \texttt{int}. Le code
+\texttt{int3} appelle l'interruption 3. \texttt{into} appelle l'interruption 4
+si le flag \texttt{OF} est défini.
+
+\texttt{bound}\emph{(destination,source)} vérifie que la valeur destination
+se trouve dans les limites définies par la source. Si la valeur contenue dans
+le registre est plus petit que la borne inférieure ou plus grand que la borne
+supérieure, on déclenche l'interruption 5. L'opérande destination est le
+registre à tester, la source est une adresse mémoire des deux valeurs limites
+signées. La taille des valeurs peut être de type \texttt{word} ou \texttt{dword}.
+\begin{verbatim}    bound ax,[bx]       ; Vérifie les bornes pour un Mot
+    bound eax,[esi]     ; Vérifie les bornes pour un Double Mot
+\end{verbatim}
+
+\begin{figure}
+  \begin{center}
+      \begin{tabular}{|c|c|c|}
+      \hline
+      Mnémonique&Conditions testées&Description\\
+      \hline\hline
+      \verb"o"&OF = 1&débordement\\
+      \hline
+      \verb"no"&OF = 0&aucun débordement\\
+      \hline
+      \verb"c"&&retenue\\
+      \verb"b"&CF = 1&inférieur\\
+      \verb"nae"&&ni supérieur ni égal\\
+      \hline
+      \verb"nc"&&aucune retenue\\
+      \verb"ae"&CF = 0&supérieur ou égal\\
+      \verb"nb"&&pas inférieur\\
+      \hline
+      \verb"e"&ZF = 1&égal\\
+      \verb"z"&&zéro\\
+      \hline
+      \verb"ne"&ZF = 0&pas égal\\
+      \verb"nz"&&différent de zéro\\
+      \hline
+      \verb"be"&CF or ZF = 1&inférieur ou égal\\
+      \verb"na"&&pas supérieur\\
+      \hline
+      \verb"a"&CF or ZF = 0&supérieur\\
+      \verb"nbe"&&différent de zéro\\
+      \hline
+      \verb"s"&SF = 1&signé\\
+      \hline
+      \verb"ns"&SF = 0&non signé\\
+      \hline
+      \verb"p"&PF = 1&parité\\
+      \verb"pe"&&parité paire\\
+      \hline
+      \verb"np"&PF = 0&aucune parité\\
+      \verb"po"&&parité impaire\\
+      \hline
+      \verb"l"&SF xor OF = 1&inférieur\\
+      \verb"nge"&&ni supérieur ni égal\\
+      \hline
+      \verb"ge"&SF xor OF = 0&supérieur ou égal\\
+      \verb"nl"&&pas inférieur\\
+      \hline
+      \verb"le"&(SF xor OF) or ZF = 1&inférieur ou égal\\
+      \verb"ng"&&pas supérieur\\
+      \hline
+      \verb"g"&(SF xor OF) or ZF = 0&supérieur\\
+      \verb"nle"&&ni inférieur ni égal\\
+      \hline
+      \end{tabular}
+      \caption{Conditions}
+  \end{center}
+\end{figure}
+\newpage
+
+\subsection{Les instructions d'E/S (Entrées/Sorties)}
+\texttt{in}\emph{(destination,source)} transfert un octet, mot ou double mot
+d'un port d'entrée vers le registre \texttt{al}, \texttt{ax} ou \texttt{eax}.
+Les ports d'entrée/sortie peuvent être adressées directement, avec une valeur
+immédiate codée en octet dans l'instruction, soit une valeur immédiate comprise
+entre 0 et 255 ou indirectement via le registre \texttt{dx}.
+La destination doit être un des registres suivant : \texttt{al}, \texttt{ax}
+ou \texttt{eax}.
+\begin{verbatim}    in al,20h           ; Récupère un octet du port 20h
+    in ax,dx            ; Récupère un mot du port adressé par dx
+\end{verbatim}
+
+\texttt{out}\emph{(destination,source)} écrit un octet, mot ou double-mot dans
+le port de destination, soit \texttt{al}, \texttt{ax} ou \texttt{eax}. On peut
+indiquer le numéro du port en utilisant les mêmes méthodes que l'instruction
+\texttt{in}.
+\begin{verbatim}    out 20h,ax          ; Ecrit un mot dans le port 20h
+    out dx,al           ; Ecrit un octet dans le port adressé par dx
+\end{verbatim}
+
+\subsection{Opérations sur les chaînes}
+Les opérations sur chaîne de caractères ne se font que sur un seul élément
+de la chaîne. Un élément de chaîne peut être un octet, un mot ou un double-mot.
+Chaque élément de la chaîne est adressé par les registres \texttt{si} et
+\texttt{di} (ou \texttt{esi} et \texttt{edi}). Aprés chaque opération sur
+la chaîne, \texttt{si} et/ou \texttt{di} (ou \texttt{esi} et/ou \texttt{edi})
+sont automatiquement mis à jour en pointant sur le prochain élément de la chaîne.
+Si \texttt{DF} (flag de direction) est égal à zéro, les registres d'index
+sont incrémentés, si \texttt{DF} est égal à un, ils sont décrémentés.
+La valeur de l'incrémentation ou de la décrémentation dépend de la taille
+de l'élément de la chaîne, soit 1, 2 ou 4 (octet, mot ou double-mot).
+Chaque instruction d'opération de chaîne a un format court qui n'a aucune
+opérande et utilise \texttt{si} et/ou \texttt{di} quand le code est en 16 bits
+ou \texttt{esi} et/ou \texttt{edi} quand le code est en 32 bits. \texttt{si}
+et \texttt{esi} adressent par défaut les données dans le segment sélectionné
+par \texttt{ds}, \texttt{di} et \texttt{edi} adressent toujours les données
+dans le segment sélectionné par \texttt{es}. La forme courte est obtenue en
+ajoutant au mnémonique une lettre indiquant la taille de l'élément de la
+chaîne, \texttt{b} pour un élément de type octet, \texttt{w} pour un élément
+de type mot, et \texttt{d} pour un élément de type double-mot. Le format
+complet veut que les opérandes indique la taille de l'opérateur ainsi que les
+adresses mémoire, cela peut être \texttt{si} ou \texttt{esi} avec n'importe
+quel prefix de segment, \texttt{di} ou \texttt{edi} avec toujours comme prefix de
+segment \texttt{es}.
+\texttt{movs}\emph{(destination,source)} transfère le contenu de la mémoire
+adressée par exemple par \texttt{[ds:si]} (ou \texttt{[ds:esi]}), ou tout autre
+segment, dans la mémoire adressée par \texttt{[es:di]} (ou \texttt{[es:edi]})
+avec toujours le segment \texttt{es}. La taille des opérandes peut être de
+type octet, mot ou double mot. La destination doit être une mémoire adressée
+par \texttt{di} ou \texttt{edi} et la source est une mémoire adressée par
+\texttt{si} ou \texttt{esi}.
+\begin{verbatim}    movs byte [di],[si]         ; Transfert d'octet de [si] vers [di]
+    movs word [es:di],[ss:si]   ; Transfert d'un mot
+    movsd                       ; Transfert d'un double-mot
+\end{verbatim}
+
+\texttt{cmps}\emph{(destination,source)} soustrait l'élément de chaîne
+destination de l'élément de chaîne source et met à jour les flags \texttt{AF},
+\texttt{SF}, \texttt{PF}, \texttt{CF} et \texttt{OF}, mais ne modifie aucun
+des éléments comparés. Si les deux éléments sont égaux, \texttt{ZF} est défini
+(= 1), autrement il est effacé (mis à zéro). Il compare donc l'octet, le mot
+ou le double-mot \texttt{[ds:si]} (ou \texttt{[ds:esi]}), ou tout autre
+segment, à la mémoire adressée par \texttt{[es:di]} (ou \texttt{[es:edi]})
+avec toujours le segment \texttt{es}.
+\begin{verbatim}    cmpsb                       ; Compare des octets
+    cmps word [ds:si],[es:di]   ; Compare des mots
+    cmps dword [fs:esi],[edi]   ; Compare des doubles mots
+\end{verbatim}
+
+\texttt{scas}\emph{(destination)} soustrait l'élément de chaîne destination du
+registre \texttt{al}, \texttt{ax} ou \texttt{eax} (en fonction de la taille de
+l'élément de la chaîne de caractères) et met à jour les flags \texttt{AF},
+\texttt{SF}, \texttt{ZF}, \texttt{PF}, \texttt{CF} et \texttt{OF}. Si les
+valeurs sont identiques, \texttt{ZF} est défini, autrement il est effacé.
+La destination doit être une mémoire adressée par \texttt{di} ou \texttt{edi}.
+\begin{verbatim}    scas byte [es:di]           ; Scanne un octet
+    scasw                       ; Scanne un mot
+    scas dword [es:edi]         ; Scanne un double mot
+\end{verbatim}
+
+\texttt{lods}\emph{(source)} met dans \texttt{al}, \texttt{ax} ou \texttt{eax}
+le contenu de la mémoire indiqué dans la source. La source doit être une mémoire
+adressée par \texttt{si} ou \texttt{esi} avec n'importe quel segment.
+\begin{verbatim}    lods byte [ds:si]           ; Charge un octet
+    lods word [cs:si]           ; Charge un mot
+    lodsd                       ; Charge un double mot
+\end{verbatim}
+
+\texttt{stos}\emph{(destination)} met la valeur de \texttt{al}, \texttt{ax} ou
+\texttt{eax} dans la mémoire indiquée dans la destination. Cette instruction
+suit les même règles que l'instruction \texttt{scas}.
+
+\texttt{ins}\emph{(destination,source)} transfère un octet, mot ou double mot
+d'un port d'entrée adressé par le registre \texttt{dx} à l'élément chaîne dans
+la destination. La destination doit être une mémoire adressée par \texttt{di} ou
+\texttt{edi}, la source doit être le registre \texttt{dx}.
+\begin{verbatim}    insb                        ; Lit un octet
+    ins word [es:di],dx         ; Lit un mot
+    ins dword [edi],dx          ; Lit un double mot
+\end{verbatim}
+
+\texttt{outs}\emph{(destination,source)} transfère un élément chaîne de
+caractère de la source vers le port de sortie adressé par le registre
+\texttt{dx}. La destination doit être le registre \texttt{dx} et la source
+doit être une mémoire adressée par \texttt{si} ou \texttt{esi} avec n'importe
+quel segment.
+\begin{verbatim}    outs dx,byte [si]           ; Ecrit un octet
+    outsw                       ; Écrit un mot
+    outs dx,dword [gs:esi]      ; Écrit un double mot
+\end{verbatim}
+
+Les préfixes de répétition \texttt{rep}, \texttt{repe}/\texttt{repz} et
+\texttt{repne}/ \texttt{repnz} permettent des opérations de répétitions sur des
+chaînes. Quand une instruction a le préfixe de répétition, celle-ci est répétée
+ chaque fois en utilisant un élément différent de la chaîne de caractères.
+ Cette répétition se termine quand une des conditions spécifiques au préfixe
+ est satisfaisante. Après chaque opération, ces trois préfixes décrémentent
+ automatiquement le registre \texttt{cx} ou \texttt{ecx} (en fonction de
+ l'adressage en 16 ou 32 bits) et se répète jusqu'à ce que \texttt{cx} ou
+ \texttt{ecx} soit égal à zéro.  \texttt{repe}/\texttt{repz} et \texttt{repne}/
+\texttt{repnz} sont exclusivement utilisés avec les instructions \texttt{scas}
+et \texttt{cmps} (décrites plus haut). Quand ces préfixes sont utilisés, la
+répétition de l'instruction suivante dépend aussi du flag zéro (\texttt{ZF}),
+\texttt{repe} et \texttt{repz} arrête l'execution du code quand \texttt{ZF}
+est égal à zéro, \texttt{repne} et \texttt{repnz} stoppe l'exécution quand
+\texttt{ZF} est défini (mis à un).
+\begin{verbatim}    rep  movsb        ; Transfert de plusieurs double mots
+    repe cmpsb        ; Compare des octets tant qu'ils sont égaux
+\end{verbatim}
+
+\subsection{Instructions de contrôle du Flag}
+Les instructions de contrôle du flag fournissent une méthode pour changer
+directement l'état d'un bit dans le registre flag. Toutes les instructions
+décrites dans cette section n'ont pas d'opérandes.
+
+\subsection{Opérations conditionnelles}
+
+\subsection{Instructions diverses}
+
+\subsection{Système}
+
+\subsection{FPU}
+
+\subsection{MMX}
+
+\subsection{SSE}
+
+\subsection{SSE2}
+
+\subsection{SSE3}
+
+\subsection{AMD 3DNow!}
+
+\subsection{Le mode x86-64}
+
+\section{Directives de contrôle}
+
+\subsection{Constantes numériques}
+
+\subsection{Assemblage conditionnel}
+
+\subsection{Blocs d'instructions répétés}
+
+\subsection{Adressage des espaces}
+
+\subsection{Autres directives}
+
+\subsection{Passages multiples}
+
+\section{Directives du pré-processeur}
+
+\subsection{Inclusion de fichiers}
+
+\subsection{Constantes symboliques}
+
+\subsection{Macro-Instructions}
+
+\subsection{Structures}
+
+\subsection{Macro-Instructions répétées}
+
+\subsection{Phase du pré-processeur conditionnelle}
+
+\subsection{Ordre du process}
+
+\section{Directives du format}
+
+\subsection{Executable MZ}
+
+\subsection{Portable Executable : PE}
+
+\subsection{Common Object File Format : COFF}
+
+\subsection{Executable and Linkable Format : ELF}

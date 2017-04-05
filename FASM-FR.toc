@@ -1,0 +1,68 @@
+\select@language {french}
+\contentsline {chapter}{\numberline {1}Introduction}{5}{chapter.1}
+\contentsline {section}{\numberline {1.1}Survol du Compilateur}{5}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Pr\'e-requis syst\`eme}{5}{subsection.1.1.1}
+\contentsline {subsection}{\numberline {1.1.2}Utilisation du compilateur}{6}{subsection.1.1.2}
+\contentsline {subsection}{\numberline {1.1.3}Ex\'ecuter le compilateur via la ligne de commande}{7}{subsection.1.1.3}
+\contentsline {subsection}{\numberline {1.1.4}Messages du compilateur en ligne de commande}{8}{subsection.1.1.4}
+\contentsline {subsection}{\numberline {1.1.5}Formats de sortie}{9}{subsection.1.1.5}
+\contentsline {section}{\numberline {1.2}Syntaxe de l'assembleur}{9}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Syntaxe des Instructions}{10}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}D\'efinitions des donn\'ees}{11}{subsection.1.2.2}
+\contentsline {subsection}{\numberline {1.2.3}Constantes et labels}{12}{subsection.1.2.3}
+\contentsline {subsection}{\numberline {1.2.4}Expressions num\'eriques}{14}{subsection.1.2.4}
+\contentsline {subsection}{\numberline {1.2.5}Sauts et Appels}{15}{subsection.1.2.5}
+\contentsline {subsection}{\numberline {1.2.6}R\'eglage de la taille}{16}{subsection.1.2.6}
+\contentsline {chapter}{\numberline {2}Jeu d'instructions}{17}{chapter.2}
+\contentsline {section}{\numberline {2.1}Les instructions de l'architecture x86}{17}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}D\'eplacement de donn\'ees}{18}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Conversion de type}{20}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.3}Les instructions de l'arithm\'etique binaire}{21}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}Les instructions de l'arithm\'etique d\'ecimale}{23}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.5}Instructions logiques}{25}{subsection.2.1.5}
+\contentsline {subsection}{\numberline {2.1.6}Les instructions de contr\^ole de transfert}{28}{subsection.2.1.6}
+\contentsline {subsection}{\numberline {2.1.7}Les instructions d'E/S (Entr\'ees/Sorties)}{32}{subsection.2.1.7}
+\contentsline {subsection}{\numberline {2.1.8}Op\'erations sur les cha\IeC {\^\i }nes}{32}{subsection.2.1.8}
+\contentsline {subsection}{\numberline {2.1.9}Instructions de contr\^ole du Flag}{34}{subsection.2.1.9}
+\contentsline {subsection}{\numberline {2.1.10}Op\'erations conditionnelles}{36}{subsection.2.1.10}
+\contentsline {subsection}{\numberline {2.1.11}Instructions diverses}{36}{subsection.2.1.11}
+\contentsline {subsection}{\numberline {2.1.12}Syst\`eme}{36}{subsection.2.1.12}
+\contentsline {subsection}{\numberline {2.1.13}FPU}{36}{subsection.2.1.13}
+\contentsline {subsection}{\numberline {2.1.14}MMX}{36}{subsection.2.1.14}
+\contentsline {subsection}{\numberline {2.1.15}SSE}{36}{subsection.2.1.15}
+\contentsline {subsection}{\numberline {2.1.16}SSE2}{36}{subsection.2.1.16}
+\contentsline {subsection}{\numberline {2.1.17}SSE3}{36}{subsection.2.1.17}
+\contentsline {subsection}{\numberline {2.1.18}AMD 3DNow!}{36}{subsection.2.1.18}
+\contentsline {subsection}{\numberline {2.1.19}Le mode x86-64}{36}{subsection.2.1.19}
+\contentsline {section}{\numberline {2.2}Directives de contr\^ole}{36}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Constantes num\'eriques}{36}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Assemblage conditionnel}{36}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}Blocs d'instructions r\'ep\'et\'es}{36}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {2.2.4}Adressage des espaces}{36}{subsection.2.2.4}
+\contentsline {subsection}{\numberline {2.2.5}Autres directives}{36}{subsection.2.2.5}
+\contentsline {subsection}{\numberline {2.2.6}Passages multiples}{36}{subsection.2.2.6}
+\contentsline {section}{\numberline {2.3}Directives du pr\'e-processeur}{36}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Inclusion de fichiers}{36}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Constantes symboliques}{36}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.3}Macro-Instructions}{36}{subsection.2.3.3}
+\contentsline {subsection}{\numberline {2.3.4}Structures}{36}{subsection.2.3.4}
+\contentsline {subsection}{\numberline {2.3.5}Macro-Instructions r\'ep\'et\'ees}{36}{subsection.2.3.5}
+\contentsline {subsection}{\numberline {2.3.6}Phase du pr\'e-processeur conditionnelle}{36}{subsection.2.3.6}
+\contentsline {subsection}{\numberline {2.3.7}Ordre du process}{36}{subsection.2.3.7}
+\contentsline {section}{\numberline {2.4}Directives du format}{36}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Executable MZ}{36}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Portable Executable : PE}{36}{subsection.2.4.2}
+\contentsline {subsection}{\numberline {2.4.3}Common Object File Format : COFF}{36}{subsection.2.4.3}
+\contentsline {subsection}{\numberline {2.4.4}Executable and Linkable Format : ELF}{36}{subsection.2.4.4}
+\contentsline {chapter}{\numberline {3}Programmation Windows}{37}{chapter.3}
+\contentsline {section}{\numberline {3.1}Ent\^etes de base}{37}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Structures}{37}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Imports}{37}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}Proc\'edures}{37}{subsection.3.1.3}
+\contentsline {subsection}{\numberline {3.1.4}Exports}{37}{subsection.3.1.4}
+\contentsline {subsection}{\numberline {3.1.5}Component Object Model : COM}{37}{subsection.3.1.5}
+\contentsline {subsection}{\numberline {3.1.6}Ressources}{37}{subsection.3.1.6}
+\contentsline {subsection}{\numberline {3.1.7}Encodage du texte}{37}{subsection.3.1.7}
+\contentsline {section}{\numberline {3.2}Ent\^etes \'etendues}{37}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Param\`etres de proc\'edure}{37}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Structurer la source}{37}{subsection.3.2.2}
