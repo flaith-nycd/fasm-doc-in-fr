@@ -7,5 +7,5 @@ J'ai repris le pdf et j'ai commence a le traduire en Francais.
 La version actuelle de Fasm est la version 1.71, celle que j'ai commence a traduire
 en etait a la version 1.66.
 
-Il n'est pas termine car je n'ai pas eu le temps, 
-je le met a disposition sur Github au cas ou quelqu'un voudra continuer a le traduire
+Elle n'est pas terminee car je n'ai pas eu le temps, 
+je la met a disposition sur Github au cas ou quelqu'un voudrait continuer a le traduire
